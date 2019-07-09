@@ -22,7 +22,7 @@ function parseQuery(rawQuery:string):string{
     if(!query.substr(0,6).toUpperCase().startsWith('SELECT')){
         return query;
     }
-    const hasLimit = query.replace(/\n\r?/g, ' ').match(/^SELECT.+LIMIT \d+;?/i);
+    const hasLimit = query.replace(/\s+/g, ' ').match(/^SELECT.+LIMIT \d+ *(OFFSET \d+ *)?;?/i);
     if(hasLimit){
         return query;
     }

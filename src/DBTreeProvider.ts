@@ -66,7 +66,7 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
             connections = {};
         }
 
-        const id = `${user}@${host}$${databaseName}$:${port}`;
+        const id = `${user}@${host}[${databaseName}]:${port}`;
         connections[id] = {
             host,
             user,
@@ -97,8 +97,10 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
         if (connections) {
             for (const id of Object.keys(connections)) {
                 const password = await keytar.getPassword(Constants.ExtensionId, id) || '';
-                connections[id].password = password;
-                ConnectionNodes.push(new ConnectionNode(id, connections[id]));
+                ConnectionNodes.push(new ConnectionNode(id, {
+                    ...connections[id],
+                    password
+                }));
                 const activeConnection = Memory.state.get('activeConnection');
                 if (!activeConnection) {
                     Memory.state.update('activeConnection', {

@@ -20,38 +20,51 @@
 				{
 				"id": "hana-explorer",
 				"title": "HANA Explorer",
-				"icon": "media/db.png"
+				"icon": "media/db.svg"
+				
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "hanaide.refreshDB",
-				"title": "Hana: Refresh",
+				"command": "hanaide.refresh",
+				"title": "Refresh",
 				"icon": {
 					"light": "media/db.svg",
 					"dark": "media/db.svg"
-				}
+				},
+				"category": "Hana DB"
 			},
 			{
 				"command": "hanaide.edit",
-				"title": "Hana: Open File to Edit"
+				"title": "Open File to Edit",
+				"category": "Hana IDE"
 			},
 			{
 				"command": "hana.executeQuery",
-				"title": "Hana DB: Execute query"
+				"title": "Execute query",
+				"category": "Hana DB"
 			},
 			{
 				"command": "hanaide.createConnection",
-				"title": "Hana DB: Create connection to instance"
+				"title": "Create connection to instance",
+				"category": "Hana DB",
+				"icon": "media/create.svg"
+			},
+			{
+				"command": "hanaide.filterTables",
+				"title": "Filter tables to show only matching names",
+				"category": "Hana DB"
 			},
 			{
 				"command": "hanaide.useConnection",
-				"title": "Hana DB: Select database connection"
+				"title": "Connect to database",
+				"category": "Hana DB"
 			},
 			{
 				"command": "hanaide.deleteConnection",
-				"title": "Hana DB: Delete all connections"
+				"title": "Delete database",
+				"category": "Hana DB"
 			}
 		],
 		"keybindings": [
@@ -68,13 +81,42 @@
 					"when": "editorLangId == sql",
 					"group": "navigation"
 				}
+			],
+			"view/item/context": [
+				{
+					"command": "hanaide.useConnection",
+					"when": "view == hanadb && viewItem == connection"
+				},
+				{
+					"command": "hanaide.filterTables",
+					"when": "view == hanadb && viewItem == database"
+				},
+				{
+					"command": "hanaide.refresh",
+					"when": "view == hanadb && viewItem"
+				},
+				{
+					"command": "hanaide.deleteConnection",
+					"when": "view == hanadb && viewItem == connection"
+				}
+			],
+			"view/title": [
+				{
+					"command": "hanaide.refresh",
+					"when": "view == hanadb"
+				},
+				{
+					"command": "hanaide.createConnection",
+					"when": "view == hanadb",
+					"group": "navigation"
+				}
 			]
 		},
 		"views": {
 			"hana-explorer": [
 				{
 					"id": "hanadb",
-					"name": "HANA IDE"
+					"name": "Hana DB"
 				}
 			]
 		},

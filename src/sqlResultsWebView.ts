@@ -15,7 +15,7 @@ export class SqlResultWebView {
             "<html>",
             "<head>",
             '<meta http-equiv="Content-type" content="text/html;charset=UTF-8">',
-            "<style>table{border-collapse:collapse; }table,td,th{border:1px dotted #ccc; padding:5px;}th {background:#444} </style>",
+            "<style>table{border-collapse:collapse; }table,td,th{border:1px dotted #ccc; padding:5px;} </style>",
             "</head>",
             "<body>",
         ].join("\n");

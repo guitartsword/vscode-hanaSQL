@@ -14,16 +14,42 @@ import { IConnection } from "./Connection";
 export class ConnectionNode implements INode {
     constructor(private readonly id:string, private readonly connection: IConnection) {
     }
-
+    public async connectToNode(callback:(id:string)=>Promise<void>) {
+        const connection = {...this.connection};
+        Memory.state.update('activeConnection', connection);
+        await callback(this.id);
+    }
     public getTreeItem(): vscode.TreeItem {
+        const id = `${this.connection.user}@${this.connection.host}-${this.connection.databaseName}`;
+        const activeConnection = Memory.state.get<IConnection>('activeConnection');
         return {
-            label: `${this.connection.user}@${this.connection.host}-${this.connection.databaseName}`,
+            label: id,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
             contextValue: "connection",
-            iconPath: path.join(__filename, "..", "..", "..", "media", "db-hana.png"),
+            iconPath: path.join(__filename, "..", "..", "..", "media", this.equalsConnection(activeConnection) ? "db-active.png": 'db-inactive.png'),
         };
     }
-
+    private equalsConnection(activeConnection:IConnection|undefined):Boolean{
+        if(!activeConnection){
+            return false;
+        }
+        if(this.connection.host !== activeConnection.host){
+            return false;
+        }
+        if(this.connection.user !== activeConnection.user){
+            return false;
+        }
+        if(this.connection.port !== activeConnection.port){
+            return false;
+        }
+        if(this.connection.instanceNumber !== activeConnection.instanceNumber){
+            return false;
+        }
+        if(this.connection.databaseName !== activeConnection.databaseName){
+            return false;
+        }
+        return true;
+    }
     public async getChildren(): Promise<INode[]> {
         const dbs = await executeQuery(this.connection, `SELECT SCHEMA_NAME as "name" FROM SYS.SCHEMAS WHERE HAS_PRIVILEGES = 'TRUE'`);
          return dbs.map<DatabaseNode>(({name}) => {
@@ -38,7 +64,7 @@ export class ConnectionNode implements INode {
         Memory.state.update('activeConnection', this.connection);
     }
 
-    public async deleteConnection(context: vscode.ExtensionContext, mysqlTreeDataProvider: DBTreeDataProvider) {
+    public async deleteConnection(context: vscode.ExtensionContext, treeProvider: DBTreeDataProvider) {
         // AppInsightsClient.sendEvent("deleteConnection");
         const connections = context.globalState.get<{ [key: string]: IConnection }>(Constants.ConnectionsKeys);
         if(connections){
@@ -48,6 +74,6 @@ export class ConnectionNode implements INode {
 
         await keytar.deletePassword(Constants.ExtensionId, this.id);
 
-        mysqlTreeDataProvider.refresh();
+        treeProvider.refresh();
     }
 }
