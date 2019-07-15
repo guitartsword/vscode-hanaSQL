@@ -24,7 +24,7 @@ export class TableNode implements INode {
     public async getChildren(): Promise<INode[]> {
         // const connection = Utility.createConnection(this.connection);
 
-        const columns = await executeQuery(this.connection, `SELECT COLUMN_NAME, DATA_TYPE_NAME, INDEX_TYPE, COMMENTS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = '${this.schemaName}' AND TABLE_NAME = '${this.tableName}' ORDER BY POSITION`);
+        const columns = await executeQuery(this.connection, `SELECT COLUMN_NAME, DATA_TYPE_NAME, INDEX_TYPE, LENGTH, COMMENTS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = '${this.schemaName}' AND TABLE_NAME = '${this.tableName}' ORDER BY POSITION`);
         return columns.map<ColumnNode>( column => {
             return new ColumnNode(this.connection, column);
         });

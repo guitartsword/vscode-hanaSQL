@@ -9,7 +9,7 @@ export class ColumnNode implements INode {
 
     public getTreeItem(): vscode.TreeItem {
         return {
-            label: `${this.column.COLUMN_NAME} : ${this.column.DATA_TYPE_NAME}     \n${this.column.COMMENTS||''}`,
+            label: `${this.column.COLUMN_NAME} : ${this.column.DATA_TYPE_NAME} (${this.column.LENGTH})    \n${this.column.COMMENTS||''}`,
             collapsibleState: vscode.TreeItemCollapsibleState.None,
             contextValue: "column",
             iconPath: path.join(__filename, "..", "..", "..", "media", this.column.INDEX_TYPE === "FULL" ? "primary.gif" : "message_info.png"),

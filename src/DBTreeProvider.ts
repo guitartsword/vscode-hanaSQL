@@ -104,11 +104,8 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
                 const activeConnection = Memory.state.get('activeConnection');
                 if (!activeConnection) {
                     Memory.state.update('activeConnection', {
-                        host: connections[id].host,
-                        user: connections[id].user,
-                        password,
-                        port: connections[id].port,
-                        certPath: connections[id].certPath,
+                        ...connections[id],
+                        password
                     });
                 }
             }
