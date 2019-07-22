@@ -46,7 +46,8 @@ export class SqlResultWebView {
             body += "<tr>";
             for (const field in row) {
                 if (row.hasOwnProperty(field)) {
-                    body += "<td>" + row[field] + "</td>";
+                    const text = String(row[field]);
+                    body += "<td>" + text.replace(/\</g, '&lt').replace(/\>/g, '&gt').replace(/\&/g, '&amp') + "</td>";
                 }
             }
 

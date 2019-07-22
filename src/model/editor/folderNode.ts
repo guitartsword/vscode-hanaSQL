@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { INode } from "../INode";
 import { IConnection } from "../Connection";
 import { getBaseFolder } from "../../util/hanaeditor";
+import { FileNode } from "./fileNode";
 
 export class FolderNode implements INode {
     constructor(private readonly connection:IConnection, private readonly name: string, private readonly path: string) {
@@ -17,9 +18,12 @@ export class FolderNode implements INode {
     }
 
     public async getChildren(): Promise<INode[]> {
-        const {Children}= await getBaseFolder<Array<any>>(this.connection, this.path);
-        return Children.map<FolderNode>(({Name}: {Name:string}) => {
-            return new FolderNode(this.connection, Name, `${this.path}/${Name}`);
+        const {Children}= await getBaseFolder(this.connection, this.path);
+        return Children.map<INode>(({Name, Directory}:{Name:string, Directory:boolean}) => {
+            if(Directory){
+                return new FolderNode(this.connection, Name, `${this.path}/${Name}`);
+            }
+            return new FileNode(this.connection, Name, `${this.path}/${Name}`);
         });
     }
 }

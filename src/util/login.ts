@@ -57,7 +57,7 @@ export async function getFile(request: Request, path:string){
         headers
     };
     request.xcsrf = token;
-    const { body } = await request.get(options);
+    const { response, body } = await request.get(options);
     return body;
 }
 export async function getFolder(request: Request, path:string){

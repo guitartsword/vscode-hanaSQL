@@ -15,6 +15,7 @@ import { Constants } from './util/constants';
 import { ConnectionNode } from './model/connectionNode';
 import { INode } from './model/INode';
 import { DatabaseNode } from './model/databaseNode';
+import { getBaseFile } from './util/hanaeditor';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -27,28 +28,21 @@ export async function activate(context: vscode.ExtensionContext) {
 	// const document = await vscode.workspace.openTextDocument(vscode.Uri.parse('file://' + vscode.workspace.rootPath + '/' + 'hana-config.json'));
 	// const config = JSON.parse(document.getText());
 	let xcsrfToken = 'unsafe';
-	// const myProvider = new class implements vscode.TextDocumentContentProvider {
+	const contentProvider = new class implements vscode.TextDocumentContentProvider {
 
-	// 	// emitter and its event
-	// 	onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
-	// 	onDidChange = this.onDidChangeEmitter.event;
+		// emitter and its event
+		onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
+		onDidChange = this.onDidChangeEmitter.event;
 
-	// 	async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-	// 		// simply invoke cowsay, use uri-path as text
-	// 		if(xcsrfToken === 'unsafe'){
-	// 			await hanaApi.login(config);
-	// 			xcsrfToken = await hanaApi.getXCSRFToken(config);
-	// 			hanaApi.setToken(xcsrfToken);
-	// 		}
-			
-	// 		const hanaPath = 'timp/bcb/ui/app/controllers/builderConfiguration/executor/executorTable.controller.js';
-	// 		hanaApi.setCookie('sapXsDevWorkspace','');
-	// 		return await hanaApi.getFile(config, hanaPath);
-	// 	}
-	// };
+		async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+			// simply invoke cowsay, use uri-path as text
+			return uri.path;
+		}
+	};
 
 	const dbTreeDataProvider = new DBTreeDataProvider(context);
-	const editorTreeProvider = new EditorTreeProvider();
+	const editorTreeProvider = new EditorTreeProvider(context);
+	
 	subscriptions.push(vscode.window.registerTreeDataProvider('hanadb', dbTreeDataProvider));
 	subscriptions.push(vscode.window.registerTreeDataProvider('hanaeditor', editorTreeProvider));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -160,7 +154,12 @@ export async function activate(context: vscode.ExtensionContext) {
 		node.setSearchText(searchText);
 		dbTreeDataProvider.refresh(node);
 	}));
-
+	subscriptions.push(vscode.commands.registerCommand('hanaide.openFile', async (connection: IConnection, path:string) => {
+		const data = getBaseFile(connection, path);
+		let uri = vscode.Uri.parse('hanaeditor:' + path);
+		let doc = await vscode.workspace.openTextDocument(uri);
+		await vscode.window.showTextDocument(doc);
+	}));
 }
 
 

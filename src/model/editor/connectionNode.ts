@@ -4,7 +4,7 @@ import * as keytar from "keytar";
 // import { AppInsightsClient } from "../../common/appInsightsClient";
 import { Constants } from "../../util/constants";
 import {  Memory, Global, addConnection  } from "../../util/storage";
-import { getBaseFolder } from "../../util/hanaeditor";
+import { getBaseFolder, getBaseFile } from "../../util/hanaeditor";
 import { DBTreeDataProvider } from "../../DBTreeProvider";
 import { FolderNode } from "./folderNode";
 // import { FileNode } from "./fileNode";
@@ -12,8 +12,13 @@ import { FolderNode } from "./folderNode";
 import { INode } from "../INode";
 import { IConnection } from "../Connection";
 
-export class ConnectionNode implements INode {
-    constructor(private readonly id:string, private readonly connection: IConnection) {
+export class ConnectionNode implements INode, vscode.TextDocumentContentProvider {
+    onDidChange?: vscode.Event<vscode.Uri> | undefined;
+    provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
+        return getBaseFile(this.connection, uri.path);
+    }
+    constructor(private readonly id:string, private readonly connection: IConnection, readonly context: vscode.ExtensionContext) {
+        context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(id, this));
     }
     public async connectToNode(callback:(id:string)=>Promise<void>) {
         const connection = {...this.connection};
@@ -52,7 +57,7 @@ export class ConnectionNode implements INode {
         return true;
     }
     public async getChildren(): Promise<INode[]> {
-        const {Children}= await getBaseFolder<Array<any>>(this.connection, '/');
+        const {Children}= await getBaseFolder(this.connection, '/');
         return Children.map<FolderNode>(({Name}: {Name:string}) => {
             return new FolderNode(this.connection, Name, `/${Name}`);
         });

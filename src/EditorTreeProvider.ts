@@ -9,9 +9,11 @@ import { INode } from "./model/INode";
 
 
 export class EditorTreeProvider implements vscode.TreeDataProvider<INode> {
+
     public _onDidChangeTreeData: vscode.EventEmitter<INode> = new vscode.EventEmitter<INode>();
     public readonly onDidChangeTreeData: vscode.Event<INode> = this._onDidChangeTreeData.event;
     
+    constructor(private readonly context: vscode.ExtensionContext){}
     public getChildren(element?: INode): Thenable<INode[]> | INode[] {
         if(!element){
             return this.getConnectionNodes();
@@ -31,7 +33,7 @@ export class EditorTreeProvider implements vscode.TreeDataProvider<INode> {
                 ConnectionNodes.push(new ConnectionNode(id, {
                     ...connections[id],
                     password
-                }));
+                }, this.context));
                 const activeConnection = Memory.state.get('activeWebConnection');
                 if (!activeConnection) {
                     Memory.state.update('activeWebConnection', {

@@ -44,6 +44,11 @@
 				"category": "Hana DB"
 			},
 			{
+				"command": "hanaide.openFile",
+				"title": "Open File",
+				"category": "Hana Editor"
+			},
+			{
 				"command": "hanaide.createConnection",
 				"title": "Create connection to instance",
 				"category": "Hana DB",
@@ -96,6 +101,11 @@
 				{
 					"command": "hanaide.deleteConnection",
 					"when": "view == hanadb && viewItem == connection"
+				},
+				{
+					"command": "hanaide.openFile",
+					"when": "view == hanaeditor && viewItem == file",
+					"group": "inline"
 				}
 			],
 			"view/title": [
@@ -149,10 +159,9 @@
 		"@types/mocha": "^2.2.42"
 	},
 	"dependencies": {
-		"@sap/hana-client": "^2.4.139",
 		"@types/request": "^2.48.1",
 		"hdb": "^0.17.0",
-		"keytar": "^4.10.0",
+		"keytar": "^4.11.0",
 		"request": "^2.88.0"
 	}
 }
