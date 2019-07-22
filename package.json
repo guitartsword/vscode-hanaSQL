@@ -10,7 +10,6 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:hana.executeQuery",
 		"*"
 	],
 	"main": "./out/extension.js",
@@ -18,10 +17,9 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-				"id": "hana-explorer",
-				"title": "HANA Explorer",
-				"icon": "media/db.svg"
-				
+					"id": "hana-explorer",
+					"title": "HANA Explorer",
+					"icon": "media/db.svg"
 				}
 			]
 		},
@@ -117,6 +115,10 @@
 				{
 					"id": "hanadb",
 					"name": "Hana DB"
+				},
+				{
+					"id": "hanaeditor",
+					"name": "Hana Editor"
 				}
 			]
 		},

@@ -2,16 +2,6 @@ import * as vscode from 'vscode';
 import * as hdb from 'hdb';
 import { Memory } from "./storage";
 import { IConnection } from '../model/Connection';
-// const hdb = {
-//     createConnection: function(){
-//         return {
-//             connect: function(conf: any){},
-//             exec: function(q:string){return []},
-//             disconnect: function(){},
-//         };
-//     }
-// };
-
 
 function getConfig(){
     return Memory.state.get<vscode.WorkspaceConfiguration>('vscode-hana');

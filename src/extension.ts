@@ -8,7 +8,8 @@ import * as keytar from 'keytar';
 
 import {SqlResultWebView} from './sqlResultsWebView';
 import {DBTreeDataProvider} from './DBTreeProvider';
-import { Global, WorkSpace, Memory } from './util/storage';
+import {EditorTreeProvider} from './EditorTreeProvider';
+import { Global, WorkSpace, Memory, addConnection } from './util/storage';
 import { IConnection } from './model/Connection';
 import { Constants } from './util/constants';
 import { ConnectionNode } from './model/connectionNode';
@@ -23,35 +24,37 @@ export async function activate(context: vscode.ExtensionContext) {
 	WorkSpace.setState(context.workspaceState);
 	Memory.setState();
 	Memory.state.update('vscode-hana', vscode.workspace.getConfiguration('vscode-hana'));
-	const document = await vscode.workspace.openTextDocument(vscode.Uri.parse('file://' + vscode.workspace.rootPath + '/' + 'hana-config.json'));
-	const config = JSON.parse(document.getText());
+	// const document = await vscode.workspace.openTextDocument(vscode.Uri.parse('file://' + vscode.workspace.rootPath + '/' + 'hana-config.json'));
+	// const config = JSON.parse(document.getText());
 	let xcsrfToken = 'unsafe';
-	const myProvider = new class implements vscode.TextDocumentContentProvider {
+	// const myProvider = new class implements vscode.TextDocumentContentProvider {
 
-		// emitter and its event
-		onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
-		onDidChange = this.onDidChangeEmitter.event;
+	// 	// emitter and its event
+	// 	onDidChangeEmitter = new vscode.EventEmitter<vscode.Uri>();
+	// 	onDidChange = this.onDidChangeEmitter.event;
 
-		async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
-			// simply invoke cowsay, use uri-path as text
-			if(xcsrfToken === 'unsafe'){
-				await hanaApi.login(config);
-				xcsrfToken = await hanaApi.getXCSRFToken(config);
-				hanaApi.setToken(xcsrfToken);
-			}
+	// 	async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+	// 		// simply invoke cowsay, use uri-path as text
+	// 		if(xcsrfToken === 'unsafe'){
+	// 			await hanaApi.login(config);
+	// 			xcsrfToken = await hanaApi.getXCSRFToken(config);
+	// 			hanaApi.setToken(xcsrfToken);
+	// 		}
 			
-			const hanaPath = 'timp/bcb/ui/app/controllers/builderConfiguration/executor/executorTable.controller.js';
-			hanaApi.setCookie('sapXsDevWorkspace','');
-			return await hanaApi.getFile(config, hanaPath);
-		}
-	};
+	// 		const hanaPath = 'timp/bcb/ui/app/controllers/builderConfiguration/executor/executorTable.controller.js';
+	// 		hanaApi.setCookie('sapXsDevWorkspace','');
+	// 		return await hanaApi.getFile(config, hanaPath);
+	// 	}
+	// };
 
 	const dbTreeDataProvider = new DBTreeDataProvider(context);
+	const editorTreeProvider = new EditorTreeProvider();
 	subscriptions.push(vscode.window.registerTreeDataProvider('hanadb', dbTreeDataProvider));
+	subscriptions.push(vscode.window.registerTreeDataProvider('hanaeditor', editorTreeProvider));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	// console.log('Congratulations, your extension "hana-editor" is now active!');
-	subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('hanafile', myProvider));
+	// subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('hanafile', myProvider));
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -91,7 +94,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		SqlResultWebView.show(data, `Results[${connection.databaseName.toUpperCase()}]: ${data.length} rows`);
 	}));
 	subscriptions.push(vscode.commands.registerCommand('hanaide.createConnection', async () => {
-		dbTreeDataProvider.addConnection();
+		await addConnection();
+		dbTreeDataProvider.refresh();
+		editorTreeProvider.refresh();
 	}));
 
 	subscriptions.push(vscode.commands.registerCommand('hanaide.deleteConnection', async (connection: ConnectionNode|undefined) => {

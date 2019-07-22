@@ -1,34 +1,25 @@
-// import * as uuidv1 from "uuid/v1";
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import * as keytar from "keytar";
-// import { AppInsightsClient } from "./common/appInsightsClient";
+
 import { Constants } from "./util/constants";
-import { Memory, Global, addConnection } from "./util/storage";
+import { Memory, Global } from "./util/storage";
 import { IConnection } from "./model/Connection";
-import { ConnectionNode } from "./model/connectionNode";
+import { ConnectionNode } from "./model/editor/connectionNode";
 import { INode } from "./model/INode";
 
-export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
+
+export class EditorTreeProvider implements vscode.TreeDataProvider<INode> {
     public _onDidChangeTreeData: vscode.EventEmitter<INode> = new vscode.EventEmitter<INode>();
     public readonly onDidChangeTreeData: vscode.Event<INode> = this._onDidChangeTreeData.event;
-
-    constructor(private context: vscode.ExtensionContext) {
-    }
-
-    public getTreeItem(element: INode): Promise<vscode.TreeItem> | vscode.TreeItem {
-        return element.getTreeItem();
-    }
-
+    
     public getChildren(element?: INode): Thenable<INode[]> | INode[] {
-        if (!element) {
+        if(!element){
             return this.getConnectionNodes();
         }
-
         return element.getChildren();
     }
-
-    public refresh(element?: INode): void {
-        this._onDidChangeTreeData.fire(element);
+    public getTreeItem(element: INode): Promise<vscode.TreeItem> | vscode.TreeItem {
+        return element.getTreeItem();
     }
 
     private async getConnectionNodes(): Promise<ConnectionNode[]> {
@@ -41,9 +32,9 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
                     ...connections[id],
                     password
                 }));
-                const activeConnection = Memory.state.get('activeConnection');
+                const activeConnection = Memory.state.get('activeWebConnection');
                 if (!activeConnection) {
-                    Memory.state.update('activeConnection', {
+                    Memory.state.update('activeWebConnection', {
                         ...connections[id],
                         password
                     });
@@ -51,5 +42,9 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
             }
         }
         return ConnectionNodes;
+    }
+
+    public refresh(element?: INode): void {
+        this._onDidChangeTreeData.fire(element);
     }
 }
