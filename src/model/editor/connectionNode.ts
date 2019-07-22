@@ -4,7 +4,7 @@ import * as keytar from "keytar";
 // import { AppInsightsClient } from "../../common/appInsightsClient";
 import { Constants } from "../../util/constants";
 import {  Memory, Global, addConnection  } from "../../util/storage";
-import { getBaseFile } from "../../util/hanaeditor";
+import { getBaseFolder } from "../../util/hanaeditor";
 import { DBTreeDataProvider } from "../../DBTreeProvider";
 import { FolderNode } from "./folderNode";
 // import { FileNode } from "./fileNode";
@@ -52,12 +52,9 @@ export class ConnectionNode implements INode {
         return true;
     }
     public async getChildren(): Promise<INode[]> {
-        const files= await getBaseFile<Array<any>>(this.connection, '/');
-        if(typeof files === 'string'){
-            return [new FolderNode(this.connection, files)];
-        }
-        return files.map<FolderNode>(({Name}: {Name:string}) => {
-            return new FolderNode(this.connection, Name);
+        const {Children}= await getBaseFolder<Array<any>>(this.connection, '/');
+        return Children.map<FolderNode>(({Name}: {Name:string}) => {
+            return new FolderNode(this.connection, Name, `/${Name}`);
         });
     }
 

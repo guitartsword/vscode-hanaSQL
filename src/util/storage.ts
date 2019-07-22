@@ -38,6 +38,10 @@ export class Memory {
     static state:LocalState;
 }
 
+export function getConnectionId(connection: IConnection) {
+    const {user, host, databaseName, port, webApiPort} = connection;
+    return `${user}@${host}[${databaseName}]:${port}:${webApiPort}`;
+}
 
 async function saveConnection(connection: IConnection) {
     const {user, host, databaseName, port, instanceNumber, webApiPort} = connection;
@@ -47,7 +51,7 @@ async function saveConnection(connection: IConnection) {
     if (!connections) {
         connections = {};
     }
-    const id = `${user}@${host}[${databaseName}]:${port}:${webApiPort}`;
+    const id = getConnectionId(connection);
     connections[id] = {
         host,
         user,
