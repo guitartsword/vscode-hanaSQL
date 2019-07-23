@@ -14,10 +14,10 @@ import { IConnection } from "./Connection";
 export class ConnectionNode implements INode {
     constructor(private readonly id:string, private readonly connection: IConnection) {
     }
-    public async connectToNode(callback:(id:string)=>Promise<void>) {
+    public connectToNode() {
         const connection = {...this.connection};
         Memory.state.update('activeConnection', connection);
-        await callback(this.id);
+        return this.id;
     }
     public getTreeItem(): vscode.TreeItem {
         const id = `${this.connection.user}@${this.connection.host}-${this.connection.databaseName}`;

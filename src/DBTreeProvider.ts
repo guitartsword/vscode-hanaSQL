@@ -37,16 +37,14 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
         if (connections) {
             for (const id of Object.keys(connections)) {
                 const password = await keytar.getPassword(Constants.ExtensionId, id) || '';
-                ConnectionNodes.push(new ConnectionNode(id, {
+                const connectionNode = new ConnectionNode(id, {
                     ...connections[id],
                     password
-                }));
+                });
+                ConnectionNodes.push(connectionNode);
                 const activeConnection = Memory.state.get('activeConnection');
                 if (!activeConnection) {
-                    Memory.state.update('activeConnection', {
-                        ...connections[id],
-                        password
-                    });
+                    vscode.commands.executeCommand('hanaide.useConnection', connectionNode);
                 }
             }
         }

@@ -40,7 +40,7 @@ export class Memory {
 
 export function getConnectionId(connection: IConnection) {
     const {user, host, databaseName, port, webApiPort} = connection;
-    return `${user}@${host}[${databaseName}]:${port}:${webApiPort}`;
+    return `${user}_at_${host}-${databaseName}_DBPORT_${port}_WEBPORT_${webApiPort}`;
 }
 
 async function saveConnection(connection: IConnection) {
@@ -100,12 +100,12 @@ export async function addConnection() {
         return;
     }
 
-    const portString = await vscode.window.showInputBox({ prompt: "The port number to connect to", placeHolder: "port", ignoreFocusOut: true, value: '30013' });
+    const portString = await vscode.window.showInputBox({ prompt: "The port number to connect to", placeHolder: "port", ignoreFocusOut: true, value: `3${instanceNumber}13` });
     const port = Number(portString);
     if (!port) {
         return;
     }
-    const webPortString = await vscode.window.showInputBox({ prompt: "The port number to connect to", placeHolder: "port", ignoreFocusOut: true, value: '30013' });
+    const webPortString = await vscode.window.showInputBox({ prompt: "The port number to connect to", placeHolder: "port", ignoreFocusOut: true, value: '8000' });
     const webApiPort = Number(webPortString);
     if (!webApiPort) {
         return;

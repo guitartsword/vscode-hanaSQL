@@ -44,6 +44,11 @@
 				"category": "Hana DB"
 			},
 			{
+				"command": "hanadb.createSQLTextDocument",
+				"title": "SELECT 1000",
+				"category": "Hana DB"
+			},
+			{
 				"command": "hanaide.openFile",
 				"title": "Open File",
 				"category": "Hana Editor"
@@ -95,8 +100,12 @@
 					"when": "view == hanadb && viewItem == database"
 				},
 				{
+					"command": "hanadb.createSQLTextDocument",
+					"when": "view == hanadb && viewItem == table"
+				},
+				{
 					"command": "hanaide.refresh",
-					"when": "view == hanadb && viewItem"
+					"when": "(view == hanadb || view == hanaeditor) && viewItem"
 				},
 				{
 					"command": "hanaide.deleteConnection",

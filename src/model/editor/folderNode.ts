@@ -1,12 +1,12 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { INode } from "../INode";
-import { IConnection } from "../Connection";
-import { getBaseFolder } from "../../util/hanaeditor";
 import { FileNode } from "./fileNode";
+import { Editor } from "../../util/login";
+import { getConnectionId } from "../../util/storage";
 
 export class FolderNode implements INode {
-    constructor(private readonly connection:IConnection, private readonly name: string, private readonly path: string) {
+    constructor(private readonly editor:Editor, private readonly name: string, private readonly path: string, private readonly connectionId:string) {
     }
 
     public getTreeItem(): vscode.TreeItem {
@@ -18,12 +18,12 @@ export class FolderNode implements INode {
     }
 
     public async getChildren(): Promise<INode[]> {
-        const {Children}= await getBaseFolder(this.connection, this.path);
+        const {Children}:{Children:Array<any>} = await this.editor.getFolder(this.path);
         return Children.map<INode>(({Name, Directory}:{Name:string, Directory:boolean}) => {
             if(Directory){
-                return new FolderNode(this.connection, Name, `${this.path}/${Name}`);
+                return new FolderNode(this.editor, Name, `${this.path}/${Name}`, this.connectionId);
             }
-            return new FileNode(this.connection, Name, `${this.path}/${Name}`);
+            return new FileNode(this.connectionId, Name, `${this.path}/${Name}`);
         });
     }
 }
