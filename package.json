@@ -3,6 +3,14 @@
 	"displayName": "SAP HANA IDE",
 	"description": "Hana (Web) IDE editor in Visual Studio Code",
 	"publisher": "guitartsword",
+	"author": {
+		"name": "Isaias Valle",
+		"email": "guitartsword@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/guitartsword/vscode-hanaSQL"
+	},
 	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.34.0"
@@ -189,18 +197,23 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
+		"vscode:prepublish": "webpack --mode production",
+		"compile": "webpack --mode none",
+		"watch": "webpack --mode none --watch",
+		"test-compile": "tsc -p ./",
 		"postinstall": "node ./node_modules/vscode/bin/install",
 		"test": "npm run compile && node ./node_modules/vscode/bin/test"
 	},
 	"devDependencies": {
+		"@types/mocha": "^2.2.42",
+		"@types/node": "^10.12.21",
+		"node-loader": "^0.6.0",
+		"ts-loader": "^6.0.4",
+		"tslint": "^5.12.1",
 		"typescript": "^3.3.1",
 		"vscode": "^1.1.28",
-		"tslint": "^5.12.1",
-		"@types/node": "^10.12.21",
-		"@types/mocha": "^2.2.42"
+		"webpack": "^4.37.0",
+		"webpack-cli": "^3.3.6"
 	},
 	"dependencies": {
 		"@types/request": "^2.48.1",
