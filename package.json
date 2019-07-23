@@ -2,7 +2,7 @@
 	"name": "vscode-hana",
 	"displayName": "SAP HANA IDE",
 	"description": "Hana (Web) IDE editor in Visual Studio Code",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.34.0"
 	},
@@ -83,6 +83,40 @@
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "hanaide.refresh",
+					"when": "false"
+				},
+				{
+					"command": "hanaide.edit",
+					"when": "false"
+				},
+				{
+					"command": "hana.executeQuery",
+					"when": "editorLangId == sql"
+				},
+				{
+					"command": "hanadb.createSQLTextDocument",
+					"when": "false"
+				},
+				{
+					"command": "hanaide.openFile",
+					"when": "false"
+				},
+				{
+					"command": "hanaide.filterTables",
+					"when": "false"
+				},
+				{
+					"command": "hanaide.useConnection",
+					"when": "false"
+				},
+				{
+					"command": "hanaide.deleteConnection",
+					"when": "false"
+				}
+			],
 			"editor/context": [
 				{
 					"command": "hana.executeQuery",
