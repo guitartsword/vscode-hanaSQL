@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as keytar from "keytar";
 // import { AppInsightsClient } from "./common/appInsightsClient";
 import { Constants } from "./util/constants";
-import { Memory, Global } from "./util/storage";
+import { Memory, Global, addConnection } from "./util/storage";
 import { IConnection } from "./model/Connection";
 import { ConnectionNode } from "./model/connectionNode";
 import { INode } from "./model/INode";
@@ -27,66 +27,6 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
         return element.getChildren();
     }
 
-    public async addConnection() {
-        // AppInsightsClient.sendEvent("addConnection.start");
-        const host = await vscode.window.showInputBox({ prompt: "The hostname of the database", placeHolder: "host", ignoreFocusOut: true });
-        if (!host) {
-            return;
-        }
-        const databaseName = await vscode.window.showInputBox({ prompt: "The tenant database", placeHolder: "[Optional] DB tenant name", ignoreFocusOut: true });
-        if (databaseName === undefined) {
-            return;
-        }
-
-        const instanceNumber = await vscode.window.showInputBox({ prompt: "Enter the instance number to digit", placeHolder: "Instance Number", ignoreFocusOut: true });
-        if (!instanceNumber) {
-            return;
-        }
-
-        const user = await vscode.window.showInputBox({ prompt: "The user to authenticate as", placeHolder: "user", ignoreFocusOut: true });
-        if (!user) {
-            return;
-        }
-
-        const password = await vscode.window.showInputBox({ prompt: "The password of the user", placeHolder: "password", ignoreFocusOut: true, password: true });
-        if (password === undefined) {
-            return;
-        }
-
-        const portString = await vscode.window.showInputBox({ prompt: "The port number to connect to", placeHolder: "port", ignoreFocusOut: true, value: '30013' });
-        const port = Number(portString);
-        if (!port) {
-            return;
-        }
-
-
-        let connections = Global.state.get<{ [key: string]: IConnection }>(Constants.ConnectionsKeys);
-
-        if (!connections) {
-            connections = {};
-        }
-
-        const id = `${user}@${host}[${databaseName}]:${port}`;
-        connections[id] = {
-            host,
-            user,
-            port,
-            instanceNumber,
-            databaseName
-        };
-
-        if (password) {
-            await keytar.setPassword(Constants.ExtensionId, id, password);
-        }
-        await Global.state.update(Constants.ConnectionsKeys, connections);
-        this.refresh();
-        Memory.state.update('activeConnection', {
-            password,
-            ...connections[id]
-        });
-        // AppInsightsClient.sendEvent("addConnection.end");
-    }
-
     public refresh(element?: INode): void {
         this._onDidChangeTreeData.fire(element);
     }
@@ -97,16 +37,14 @@ export class DBTreeDataProvider implements vscode.TreeDataProvider<INode> {
         if (connections) {
             for (const id of Object.keys(connections)) {
                 const password = await keytar.getPassword(Constants.ExtensionId, id) || '';
-                ConnectionNodes.push(new ConnectionNode(id, {
+                const connectionNode = new ConnectionNode(id, {
                     ...connections[id],
                     password
-                }));
+                });
+                ConnectionNodes.push(connectionNode);
                 const activeConnection = Memory.state.get('activeConnection');
                 if (!activeConnection) {
-                    Memory.state.update('activeConnection', {
-                        ...connections[id],
-                        password
-                    });
+                    vscode.commands.executeCommand('hanaide.useConnection', connectionNode);
                 }
             }
         }

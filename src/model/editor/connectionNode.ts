@@ -1,23 +1,31 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as keytar from "keytar";
-// import { AppInsightsClient } from "../common/appInsightsClient";
-import { Constants } from "../util/constants";
-import {  Memory } from "../util/storage";
-import { executeQuery } from "../util/hanadb";
-import { DBTreeDataProvider } from "../DBTreeProvider";
-import { DatabaseNode } from "./databaseNode";
-// import { InfoNode } from "./infoNode";
-import { INode } from "./INode";
-import { IConnection } from "./Connection";
+import { Constants } from "../../util/constants";
+import {  Memory, getConnectionId  } from "../../util/storage";
+import { DBTreeDataProvider } from "../../DBTreeProvider";
+import { FolderNode } from "./folderNode";
+import { INode } from "../INode";
+import { IConnection } from "../Connection";
+import { Editor } from "../../util/login";
+import { Request } from "../../util/request";
 
-export class ConnectionNode implements INode {
-    constructor(private readonly id:string, private readonly connection: IConnection) {
+export class ConnectionNode implements INode, vscode.TextDocumentContentProvider {
+    onDidChange?: vscode.Event<vscode.Uri> | undefined;
+    editor:Editor;
+    provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
+        return this.editor.getFile(uri.path);
     }
-    public connectToNode() {
+    constructor(private readonly id:string, private readonly connection: IConnection, readonly context: vscode.ExtensionContext) {
+        context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(id, this));
+        const {host, databaseName, webApiPort} = this.connection;
+        const request = new Request(`http://${host}-${databaseName}`, webApiPort);
+        this.editor = new Editor(request, this.connection.user, this.connection.password || '');
+    }
+    public async connectToNode(callback:(id:string)=>Promise<void>) {
         const connection = {...this.connection};
         Memory.state.update('activeConnection', connection);
-        return this.id;
+        await callback(this.id);
     }
     public getTreeItem(): vscode.TreeItem {
         const id = `${this.connection.user}@${this.connection.host}-${this.connection.databaseName}`;
@@ -51,17 +59,10 @@ export class ConnectionNode implements INode {
         return true;
     }
     public async getChildren(): Promise<INode[]> {
-        const dbs = await executeQuery(this.connection, `SELECT SCHEMA_NAME as "name" FROM SYS.SCHEMAS WHERE HAS_PRIVILEGES = 'TRUE'`);
-         return dbs.map<DatabaseNode>(({name}) => {
-            return new DatabaseNode(this.connection, name);
+        const {Children}:{Children:Array<any>}= await this.editor.getFolder('/');
+        return Children.map<FolderNode>(({Name}: {Name:string}) => {
+            return new FolderNode(this.editor, Name, `/${Name}`, getConnectionId(this.connection));
         });
-    }
-
-    public async newQuery() {
-        // AppInsightsClient.sendEvent("newQuery", { viewItem: "connection" });
-        // Utility.createSQLTextDocument();
-
-        Memory.state.update('activeConnection', this.connection);
     }
 
     public async deleteConnection(context: vscode.ExtensionContext, treeProvider: DBTreeDataProvider) {

@@ -6,7 +6,7 @@ import { Memory } from "../util/storage";
 import { ColumnNode } from "./columnNode";
 import { INode } from "./INode";
 import { IConnection } from "./Connection";
-import { executeQuery } from "../util/hanadb";
+import { executeQuery, createSQLTextDocument } from "../util/hanadb";
 
 export class TableNode implements INode {
     constructor(private readonly connection: IConnection, private readonly schemaName: string, private readonly tableName: string) {
@@ -20,31 +20,24 @@ export class TableNode implements INode {
             iconPath: path.join(__filename, "..", "..", "..", "media", "table.gif"),
         };
     }
-
+    private async getColumns(): Promise<Array<any>>{
+        return await executeQuery(this.connection, `SELECT COLUMN_NAME, DATA_TYPE_NAME, INDEX_TYPE, LENGTH, COMMENTS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = '${this.schemaName}' AND TABLE_NAME = '${this.tableName}' ORDER BY POSITION`);
+    }
     public async getChildren(): Promise<INode[]> {
         // const connection = Utility.createConnection(this.connection);
 
-        const columns = await executeQuery(this.connection, `SELECT COLUMN_NAME, DATA_TYPE_NAME, INDEX_TYPE, LENGTH, COMMENTS FROM TABLE_COLUMNS WHERE SCHEMA_NAME = '${this.schemaName}' AND TABLE_NAME = '${this.tableName}' ORDER BY POSITION`);
+        const columns = await this.getColumns();
         return columns.map<ColumnNode>( column => {
             return new ColumnNode(this.connection, column);
         });
     }
 
     public async selectTop1000() {
-        // AppInsightsClient.sendEvent("selectTop1000");
-        // const sql = `SELECT * FROM \`${this.database}\`.\`${this.table}\` LIMIT 1000;`;
-        // Utility.createSQLTextDocument(sql);
-
-        // const connection = {
-        //     host: this.host,
-        //     user: this.user,
-        //     password: this.password,
-        //     port: this.port,
-        //     database: this.database,
-        //     certPath: this.certPath,
-        // };
+        const columns = await this.getColumns();
+        const columnMap:Array<string> = columns.map(column => `"${this.tableName}"."${column.COLUMN_NAME}"`);
+        const sql = `SELECT\n\t${columnMap.join(',\n\t')}\nFROM\n\t"${this.schemaName}"."${this.tableName}"\nLIMIT\n\t1000;`;
+        await createSQLTextDocument(sql);
+        // executeQuery(this.connection, sql);
         Memory.state.update('activeConnection', this.connection);
-
-        // Utility.runQuery(sql, connection);
     }
 }

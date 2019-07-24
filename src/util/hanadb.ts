@@ -1,17 +1,11 @@
 import * as vscode from 'vscode';
 import * as hdb from 'hdb';
+import * as keytar from 'keytar';
 import { Memory } from "./storage";
 import { IConnection } from '../model/Connection';
-// const hdb = {
-//     createConnection: function(){
-//         return {
-//             connect: function(conf: any){},
-//             exec: function(q:string){return []},
-//             disconnect: function(){},
-//         };
-//     }
-// };
-
+import { ConnectionNode } from '../model/connectionNode';
+import { Constants } from './constants';
+import { INode } from '../model/INode';
 
 function getConfig(){
     return Memory.state.get<vscode.WorkspaceConfiguration>('vscode-hana');
@@ -62,4 +56,26 @@ export async function executeQuery(conf:IConnection, rawQuery:string):Promise<Ar
         });
     });
     return executionPromise;
+}
+
+export async function createSQLTextDocument(sql: string = "") {
+    const textDocument = await vscode.workspace.openTextDocument({ content: sql, language: "sql" });
+    return vscode.window.showTextDocument(textDocument);
+}
+
+export async function useConnection(connection:ConnectionNode){
+    const id = connection.connectToNode();
+    const activeConnection = Memory.state.get<{[key: string]:any}>('activeConnection');
+    if(!activeConnection){
+        return;
+    }
+    if(!activeConnection.password){
+        activeConnection.password = await keytar.getPassword(Constants.ExtensionId, id) || '';
+    }
+    if(!activeConnection.password){
+        activeConnection.password = await vscode.window.showInputBox({
+            placeHolder: 'Password'
+        });
+    }
+    return;
 }
