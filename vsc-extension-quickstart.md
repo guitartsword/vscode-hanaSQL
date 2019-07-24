@@ -34,6 +34,12 @@
   * By convention, the test runner will only consider files matching the name pattern `**.test.ts`.
   * You can create folders inside the `test` folder to structure your tests any way you want.
 
+## Publish extensions
+```sh
+vsce package
+vsce publish
+```
+
 ## Go further
 
  * Reduce the extension size and improve the startup time by [bundling your extension](https://code.visualstudio.com/api/working-with-extensions/testing-extension).
