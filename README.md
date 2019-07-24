@@ -9,6 +9,30 @@ database or tenant and execute queries with the active connection.
 
 Continas a basic HANA file viewer. You can open folders and read file contents.
 
+### Install and configuration
+<p align="center">
+  <br />
+  <img src="https://raw.githubusercontent.com/guitartsword/vscode-hanaSQL/master/images/create_connection.gif"
+    alt="Extension configuration" />
+  <br />
+</p>
+
+### DB usage
+<p align="center">
+  <br />
+  <img src="https://raw.githubusercontent.com/guitartsword/vscode-hanaSQL/master/images/db_usage.gif"
+    alt="Database usage" />
+  <br />
+</p>
+
+## Editor usage
+<p align="center">
+  <br />
+  <img src="https://raw.githubusercontent.com/guitartsword/vscode-hanaSQL/master/images/editor_usage.gif"
+    alt="Editor usge" />
+  <br />
+</p>
+
 ## Requirements
 
 You must configure your host file to access HANA servers.
